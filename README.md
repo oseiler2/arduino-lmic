@@ -1014,6 +1014,8 @@ function uflt12f(rawUflt12)
   - Initialize DHT sensor in ttn-abp-feather-us915-dht22 example ([#902](https://github.com/mcci-catena/arduino-lmic/pull/902))
   - Fix configPower for sx1272 ([#894](https://github.com/mcci-catena/arduino-lmic/pull/894))
   - Enable device time by request ([#840](https://github.com/mcci-catena/arduino-lmic/pull/840))
+  - Refactor the LMIC to enable secure element support ([#578](https://github.com/mcci-catena/arduino-lmic/issues/578)).
+  - Start resurrecting Doxygen support.
 
 - v4.1.1 is a patch release.
 
