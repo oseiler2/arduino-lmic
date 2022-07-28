@@ -760,6 +760,10 @@ struct lmic_t {
     /// running the state machine. Don't use it for other purposes.
     osjob_t     osjob;
 
+    /// the OS job object for events. pointer alignment. This is only for use by
+    /// the LMIC for injecting deferred callbacks. Don't use it for other purposes.
+    osjob_t     osjob_defer;
+
 #if !defined(DISABLE_BEACONS)
     bcninfo_t   bcninfo;      ///< Last received beacon info
 #endif
