@@ -1791,8 +1791,41 @@ static void processRx1DnData (xref2osjob_t osjob) {
 static void processRxCDnData (xref2osjob_t osjob) {
     LMIC_API_PARAMETER(osjob);
 
-    radioGetRxResults();
-    processDnData();
+    // copy received data from Class C buffer to main frame
+    LMIC.dataLen = LMIC.radio.dataLen;
+#if LMIC_DEBUG_LEVEL > 0
+    LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": processRxCDnData: radio.dataLen=%d\n", os_getTime(), LMIC.radio.dataLen);
+    if (LMIC.radio.dataLen > 0 && LMIC.radio.dataLen <= 20) {
+        LMIC_DEBUG_PRINTF("  Raw: ");
+        for (int i = 0; i < LMIC.radio.dataLen; i++)
+            LMIC_DEBUG_PRINTF("%02X ", LMIC.classC.frame[i]);
+        LMIC_DEBUG_PRINTF("\n");
+    }
+#endif
+    if (LMIC.dataLen > 0) {
+        os_copyMem(LMIC.frame, LMIC.classC.frame, LMIC.dataLen);
+    }
+
+    // set txrxFlags to indicate Class C reception
+    initTxrxFlags(__func__, LMIC_txrxFlags_setClassC(0));
+
+    // process the downlink
+    if (LMIC.dataLen > 0 && decodeFrame()) {
+        // successful decode - report the event
+        reportEventNoUpdate(EV_RXCOMPLETE);
+#if LMIC_DEBUG_LEVEL > 0
+        LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": Class C decode OK, dataLen after decode=%d\n", os_getTime(), LMIC.dataLen);
+#endif
+        // If confirmed downlink received, trigger engineUpdate to schedule ACK uplink
+        // engineUpdate will restart Class C after TX completes (via updataDone)
+        if (LMIC.dnConf) {
+            engineUpdate();
+            return;  // don't restart Class C here - engineUpdate handles it after ACK TX
+        }
+    }
+
+    // restart Class C reception
+    setupRxClassC();
 }
 
 static void setupRx1DnData (xref2osjob_t osjob) {

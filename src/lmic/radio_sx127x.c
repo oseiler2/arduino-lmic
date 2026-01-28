@@ -1533,7 +1533,7 @@ static void os_radio_reset(void) {
     // the radio needs time to recover from a reset;
     // otherwise we won't see the desired sleep state
     // when doing something else.
-    hal_waitUntil(os_getTime() + ms2osticks(1));
+    lmic_hal_waitUntil(os_getTime() + ms2osticks(1));
 }
 
 void os_radio (u1_t mode) {
@@ -1633,7 +1633,8 @@ void os_radio_v2 (u1_t mode, osjob_t *pJob) {
         break;
 
       case RADIO_RXON:
-        // start scanning for beacon now
+      case RADIO_RXON_C:
+        // start scanning for beacon now (or class C continuous RX)
         LMIC.radio.state = LMIC_RADIO_EV_RXSTART;
         startrx(RXMODE_SCAN); // buf=LMIC.radio.pFrame
         break;
