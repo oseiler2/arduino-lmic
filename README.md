@@ -42,6 +42,7 @@
 	- [Controlling use of interrupts](#controlling-use-of-interrupts)
 	- [Disabling PING](#disabling-ping)
 	- [Disabling Beacons](#disabling-beacons)
+	- [Enabling Class C](#enabling-class-c)
 	- [Enabling/Disabling Network Time Support](#enablingdisabling-network-time-support)
 	- [Rarely changed variables](#rarely-changed-variables)
 		- [Changing debug output](#changing-debug-output)
@@ -135,7 +136,7 @@ Raise a GitHub issue at [`github.com/mcci-catena/arduino-lmic`](https://github.c
 
 ## Features
 
-The LMIC library provides a fairly complete LoRaWAN Class A and Class B
+The LMIC library provides a fairly complete LoRaWAN Class A, Class B, and Class C
 implementation, supporting the EU-868, US-915, AU-921, AS-923, and IN-866 bands. Only a limited
 number of features was tested using this port on Arduino hardware, so be careful when using any of the untested features.
 
@@ -149,11 +150,13 @@ What certainly works:
 - Over-the-air activation (OTAA / joining).
 - Receiving downlink packets in the RX1 and RX2 windows.
 - MAC command processing.
+- Class C continuous reception (must be explicitly enabled at compile time and runtime).
 
 What has not been tested:
 
 - Class B operation.
 - FSK has not been extensively tested. (Testing with the RedwoodComm RWC5020A analyzer in 2019 indicated that FSK downlink is stable but not reliable. This prevents successful completion of LoRaWAN pre-certification in regions that require support for FSK.)
+- Class C with SX1262 radio (known compilation issues exist).
 
 If you try one of these untested features and it works, be sure to let
 us know (creating a GitHub issue is probably the best way for that).
@@ -332,6 +335,18 @@ If defined, removes all code needed for handling beacons. Removes the APIs `LMIC
 Enabling beacon handling allows tracking of network time, and is required if you want to enable downlink during ping slots. However, many networks don't support Class B devices. Class A devices don't support tracking beacons, so defining `DISABLE_BEACONS` might be a good idea.
 
 By default, beacon support is included in the library.
+
+### Enabling Class C
+
+`#define LMIC_ENABLE_class_c 1`
+
+If defined to a non-zero value, enables Class C continuous reception support. Class C devices keep the receiver active whenever not transmitting, allowing them to receive downlink messages at any time (not just during the RX1/RX2 windows after an uplink).
+
+When enabled, you must also call `LMIC_enableClassC(1)` at runtime (typically in your `EV_JOINED` event handler) to activate Class C mode. See [doc/CLASS-C.md](doc/CLASS-C.md) for detailed usage information.
+
+By default, Class C support is disabled (`LMIC_ENABLE_class_c` is 0) to minimize code size and RAM usage on constrained devices.
+
+**Note:** Class C is currently only tested with SX1276 radio. SX1262 radio has known compilation issues with Class C enabled.
 
 ### Enabling/Disabling Network Time Support
 
