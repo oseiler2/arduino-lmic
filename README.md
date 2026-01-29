@@ -156,7 +156,6 @@ What has not been tested:
 
 - Class B operation.
 - FSK has not been extensively tested. (Testing with the RedwoodComm RWC5020A analyzer in 2019 indicated that FSK downlink is stable but not reliable. This prevents successful completion of LoRaWAN pre-certification in regions that require support for FSK.)
-- Class C with SX1262 radio (known compilation issues exist).
 
 If you try one of these untested features and it works, be sure to let
 us know (creating a GitHub issue is probably the best way for that).
@@ -345,8 +344,6 @@ If defined to a non-zero value, enables Class C continuous reception support. Cl
 When enabled, you must also call `LMIC_enableClassC(1)` at runtime (typically in your `EV_JOINED` event handler) to activate Class C mode. See [doc/CLASS-C.md](doc/CLASS-C.md) for detailed usage information.
 
 By default, Class C support is disabled (`LMIC_ENABLE_class_c` is 0) to minimize code size and RAM usage on constrained devices.
-
-**Note:** Class C is currently only tested with SX1276 radio. SX1262 radio has known compilation issues with Class C enabled.
 
 ### Enabling/Disabling Network Time Support
 

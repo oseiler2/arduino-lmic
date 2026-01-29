@@ -31,6 +31,7 @@
 #define LMIC_DR_LEGACY 0
 
 #include "lmic.h"
+#include "../se/i/lmic_secure_element_api.h"
 
 #if defined(CFG_sx1261_radio) || defined(CFG_sx1262_radio)
 // This driver is based on Rev. 2.1 of the Semtech SX1261/2 Data Sheet DS.SX1261-2.W.APP
@@ -248,6 +249,8 @@
 // RADIO STATE
 // (initialized by radio_init(), used by radio_rand1())
 static u1_t randbuf[SX126X_RAND_SEED_LEN];
+static u4_t randround;
+static u1_t randseed[SX126X_RAND_SEED_LEN];
 
 // ----------------------------------------
 // Chapter 13.2: Registers and Buffer Access Functions
@@ -516,7 +519,7 @@ static u1_t getPacketType(void) {
 // params than is used here. This might become a TODO, to implement the rest of
 // the optimal setPaParams
 static void setTxParams(void) {
-    s1_t setTxPower = LMIC.radio_txpow;
+    s1_t setTxPower = LMIC.radio.txpow;
     #ifdef CFG_sx1261_radio
     if (setTxPower == 15) {
         setPaConfig(0x06, 0x00, 0x01, 0x01);
@@ -1153,9 +1156,11 @@ int radio_init(void) {
         return 0;
     }
 
-    // seed 15-byte randomness via noise rssi
+    // seed randomness via hardware RNG
     randomNumber(randbuf);
+    randomNumber(randseed);
     randbuf[0] = 16; // set initial index
+    randround = 0;
     
     // Sleep needs to be entered from standby_RC mode 
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
@@ -1171,7 +1176,9 @@ u1_t radio_rand1(void) {
     u1_t i = randbuf[0];
     ASSERT( i != 0 );
     if(i == 16) {
-        os_aes(AES_ENC, randbuf, 16); // encrypt seed with any key
+        os_wlsbf4(randbuf, randround);
+        ++randround;
+        LMIC_SecureElement_aes128Encrypt(randseed, randbuf, randbuf); // encrypt seed with any key
         i = 0;
     }
     u1_t v = randbuf[i++];
@@ -1463,7 +1470,7 @@ void os_radio(u1_t mode) {
     LMIC.radio.rps = LMIC.rps;
     LMIC.radio.rxsyms = LMIC.rxsyms;
     LMIC.radio.dataLen = LMIC.dataLen;
-    LMIC.radio.txpow = LMIC.radio_txpow;
+    // Note: LMIC.radio.txpow is already set by lmic.c before calling os_radio()
     LMIC.radio.flags = 0;
     if (LMIC.noRXIQinversion) {
         LMIC.radio.flags |= LMIC_RADIO_FLAGS_NO_RX_IQ_INVERSION;

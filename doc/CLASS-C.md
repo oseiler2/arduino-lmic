@@ -152,7 +152,6 @@ Class C operation significantly increases power consumption because the radio re
 
 ## Known Limitations
 
-- **SX1262 Radio:** Class C compilation with SX1262 radio has known issues (`LMIC.radio_txpow` reference errors). Use SX1276 radio for Class C operation.
 - **Class B Interaction:** Class C and Class B features should not be used simultaneously.
 - **Frame Counters:** As with all LoRaWAN operation, frame counters must be preserved across reboots for production deployments.
 

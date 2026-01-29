@@ -70,7 +70,13 @@ then
     PLATFORMIO_BUILD_FLAGS='-D CFG_us915 -D CFG_sx1276_radio -D LMIC_ENABLE_class_c=1 -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
     PLATFORMIO_BUILD_FLAGS='-D CFG_eu868 -D CFG_sx1276_radio -D LMIC_ENABLE_class_c=1 -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
 
-    # NOTE: SX1262 Class C tests disabled - radio_sx126x.c has known bug with LMIC.radio_txpow reference
+    # Compile "ttn-otaa" example with SX1262 radio
+    PLATFORMIO_BUILD_FLAGS='-D CFG_us915 -D CFG_sx1262_radio -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
+    PLATFORMIO_BUILD_FLAGS='-D CFG_eu868 -D CFG_sx1262_radio -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
+
+    # Compile "ttn-otaa" example with Class C enabled (SX1262 radio)
+    PLATFORMIO_BUILD_FLAGS='-D CFG_us915 -D CFG_sx1262_radio -D LMIC_ENABLE_class_c=1 -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
+    PLATFORMIO_BUILD_FLAGS='-D CFG_eu868 -D CFG_sx1262_radio -D LMIC_ENABLE_class_c=1 -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
 
     # Compile "ttn-otaa" example with Class C and debug output
     PLATFORMIO_BUILD_FLAGS='-D CFG_us915 -D CFG_sx1276_radio -D LMIC_ENABLE_class_c=1 -D LMIC_DEBUG_LEVEL=1 -D LMIC_PRINTF_TO=Serial -D COMPILE_REGRESSION_TEST -D ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS' platformio ci --lib . --board heltec_wifi_lora_32 'examples/ttn-otaa/ttn-otaa.ino'
