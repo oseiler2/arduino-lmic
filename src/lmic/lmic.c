@@ -1788,6 +1788,7 @@ static void processRx1DnData (xref2osjob_t osjob) {
     setupRxClassC();
 }
 
+#if LMIC_ENABLE_class_c
 static void processRxCDnData (xref2osjob_t osjob) {
     LMIC_API_PARAMETER(osjob);
 
@@ -1827,6 +1828,7 @@ static void processRxCDnData (xref2osjob_t osjob) {
     // restart Class C reception
     setupRxClassC();
 }
+#endif // LMIC_ENABLE_class_c
 
 static void setupRx1DnData (xref2osjob_t osjob) {
     LMIC_API_PARAMETER(osjob);
