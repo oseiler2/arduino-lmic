@@ -1805,6 +1805,7 @@ static void processRxCDnData (xref2osjob_t osjob) {
 #endif
     if (LMIC.dataLen > 0) {
         os_copyMem(LMIC.frame, LMIC.classC.frame, LMIC.dataLen);
+        LMIC.radio.pFrame = LMIC.frame;
     }
 
     // set txrxFlags to indicate Class C reception
