@@ -32,7 +32,7 @@ LMIC_BEGIN_DECLS
 #define LMIC_DEPRECATED_MACRO(m)	_Pragma(#m)
 #define LMIC_DEPRECATED_FUNCTION(reason) __attribute__((__deprecated__(reason)))
 
-#if ! defined(LMIC_REGION_au921) && ARDUINO_LMIC_VERSION < ARDUINO_LMIC_VERSION_CALC(5,0,0,0) 
+#if ! defined(LMIC_REGION_au921) && ARDUINO_LMIC_VERSION < ARDUINO_LMIC_VERSION_CALC(5,0,0,0)
 # define LMIC_REGION_au921	LMIC_DEPRECATED_MACRO(GCC warning "LMIC_REGION_au921 is deprecated, EOL at V5, use LMIC_REGION_au915") \
                 LMIC_REGION_au915
 

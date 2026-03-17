@@ -469,7 +469,7 @@ static void setDIO3AsTcxoCtrl(float tcxoVoltage, u1_t delay[SX126X_TIMEOUT_LEN])
     default:
         ASSERT(0);
     }
-    
+
     for (u1_t i = 0; i < (SX126X_TIMEOUT_LEN + 1); i++) {
         setDio3AsTcxoParam[i] = (i == 0) ? voltageParam : delay[i - 1];
     }
@@ -509,7 +509,7 @@ static u1_t getPacketType(void) {
 // 1) The selected power is within the expected range of the modem, and
 // 2) The optimal PAConfig settings are selected, and
 // 3) Finally, set the TxPower and RampTime
-// 
+//
 // We otherwise assume that the bandplan and LMIC have selected an appropriate
 // power for the location and frequency
 //
@@ -526,13 +526,13 @@ static void setTxParams(void) {
     } else {
         setPaConfig(0x04, 0x00, 0x01, 0x01);
     }
- 
+
     if (setTxPower >= 14) {
         setTxPower = 14;
     } else if (setTxPower < -17) {
         setTxPower = -17;
     }
-    
+
     #elif CFG_sx1262_radio
     setPaConfig(0x04, 0x07, 0x00, 0x01);
     if (setTxPower > 22) {
@@ -546,7 +546,7 @@ static void setTxParams(void) {
         setTxPower,
         SET_RAMP_40U,
     };
-    
+
     lmic_hal_spi_write(SetTxParams, txParams, 2);
 
     // TODO adjust OCP based on tx power to save power
@@ -556,7 +556,7 @@ static void setTxParams(void) {
 // The `setModulationParams` function can largely reuse `configLoraModem` from original radio.c
 static void setModulationParams(u1_t packetType) {
     if (packetType == PACKET_TYPE_LORA) {
-        
+
         u1_t modParams[SX126X_LORA_MODPARAMS_LEN] = {0};
 
         // LoRa ModParam1 - SF
@@ -591,7 +591,7 @@ static void setModulationParams(u1_t packetType) {
         default:
             ASSERT(0);
         }
-        
+
         // LoRa ModParam4 - LDRO
         if (((sf == SF11 || sf == SF12) && bw == BW125) || (sf == SF12 && bw == BW250)) {
             modParams[3] = 0x01;
@@ -617,7 +617,7 @@ static void setModulationParams(u1_t packetType) {
         // GFSK ModParam5 - BW
         // select RX_BW_117300 (117.3 kHz DSB)
         modParams[4] = 0x0B;
-        
+
         // GFSK ModParam6, 7 & 8 - Fdev
         // Fdev = (Frequency Deviation * 2^25) / Fxtal
         // Using + / - 25kHz, Fdev = 0x006666
@@ -632,7 +632,7 @@ static void setModulationParams(u1_t packetType) {
 // The `setPacketParams` function sets several parameters that the original radio.c achieved using individual writeReg calls
 static void setPacketParams(u1_t packetType, u1_t frameLength, u1_t invertIQ) {
     if (packetType == PACKET_TYPE_LORA) {
-        
+
         u1_t packetParams[SX126X_LORA_PACKETPARAMS_LEN] = {0};
 
         // LoRa PacketParam1 (MSB) & 2 (LSB) - PreambleLength
@@ -766,7 +766,7 @@ static void getPacketStatus(xref2u1_t rxBufferStatus) {
 
 // Perform radio configuration commands required at the start of tx and rx
 void radio_config(void) {
-    // Perform necessary operations from STDBY_RC mode 
+    // Perform necessary operations from STDBY_RC mode
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
         // Assume we've woken from sleep
         while (lmic_hal_radio_spi_is_busy());
@@ -790,7 +790,7 @@ void radio_config(void) {
     // If the board has TCXO, the calibration order is important.
     if (lmic_hal_queryUsingDIO3AsTCXOSwitch()) {
         float tcxoVoltage = 1.8;
-        u1_t tcxoTimeout[SX126X_TIMEOUT_LEN] = {0x00, 0x01, 0x40}; // 
+        u1_t tcxoTimeout[SX126X_TIMEOUT_LEN] = {0x00, 0x01, 0x40}; //
         setDIO3AsTcxoCtrl(tcxoVoltage, tcxoTimeout);
         calibrate(calibParamALL);
         calibrateImage();
@@ -841,7 +841,7 @@ static void txlora(void) {
     // Set 10s timeout
     u1_t timeout[SX126X_TIMEOUT_LEN] = {0x09, 0xC4, 0x00};
     setTx(timeout);
-    
+
 #if LMIC_DEBUG_LEVEL > 0
     u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
     u1_t bw = getBw(LMIC.rps);
@@ -868,7 +868,7 @@ static void txfsk(void) {
 
     setModulationParams(PACKET_TYPE_GFSK);
     setPacketParams(PACKET_TYPE_GFSK, LMIC.dataLen, LMIC.noRXIQinversion);
-    
+
     // Set DioIrq params to DIO1
     u2_t clearAllIrq = 0x03FF;
     u2_t dioMask = TxDone | Timeout;
@@ -885,7 +885,7 @@ static void txfsk(void) {
         }
     }
     LMICOS_logEventUint32("+Tx FSK", LMIC.dataLen);
-    
+
     // Set 10s timeout
     u1_t timeout[SX126X_TIMEOUT_LEN] = {0x09, 0xC4, 0x00};
     setTx(timeout);
@@ -909,7 +909,7 @@ static void starttx(void) {
             return;
         }
     }
-    
+
     if (getSf(LMIC.rps) == FSK) { // FSK modem
         txfsk();
     } else { // LoRa modem
@@ -946,9 +946,9 @@ static void rxlora(u1_t rxmode) {
     radio_config();
     setPacketType(PACKET_TYPE_LORA);
     setRfFrequency();
-    
+
     setBufferBaseAddress();
-    
+
     setModulationParams(PACKET_TYPE_LORA);
 
     // Adapted from radio.c. Treat default as DISABLE_INVERT_IQ_ON_RX
@@ -959,14 +959,14 @@ static void rxlora(u1_t rxmode) {
     // XXX: use flag to switch on/off inversion
     invertIq = LMIC.noRXIQinversion ? 0x00 : 0x01;
 #endif
-    
+
     setPacketParams(PACKET_TYPE_LORA, MAX_LEN_FRAME, invertIq);
-    
+
     // Rx Boosted gain. Default is Rx Power saving. Uncomment if boosted is desired
     // writeRegister(RxGain, (readRegister(RxGain) | 0x96));
 
     lmic_hal_pin_rxtx(0);
-    
+
     // Set DioIrq params to DIO1
     u2_t dioMask = RxDone | Timeout;
     u2_t noMask = 0;
@@ -1032,9 +1032,9 @@ static void rxfsk(u1_t rxmode) {
     radio_config();
     setPacketType(PACKET_TYPE_GFSK);
     setRfFrequency();
-    
+
     setBufferBaseAddress();
-    
+
     setModulationParams(PACKET_TYPE_GFSK);
     setPacketParams(PACKET_TYPE_GFSK, MAX_LEN_FRAME, 0);
 
@@ -1042,7 +1042,7 @@ static void rxfsk(u1_t rxmode) {
     // writeRegister(RxGain, (readRegister(RxGain) | 0x96));
 
     lmic_hal_pin_rxtx(0);
-    
+
     // Set DioIrq params to DIO1
     u2_t dioMask = RxDone | Timeout;
     u2_t noMask = 0;
@@ -1090,7 +1090,7 @@ static void startrx(u1_t rxmode) {
 void randomNumber(xref2u1_t randbuf) {
     // Send configuration commands to radio
     radio_config();
-            
+
     u1_t rxTimeoutContinuous[SX126X_TIMEOUT_LEN] = {
         0xFF,
         0xFF,
@@ -1098,7 +1098,7 @@ void randomNumber(xref2u1_t randbuf) {
     };
 
     setRx(rxTimeoutContinuous);
-    
+
     lmic_hal_waitUntil(os_getTime() + ms2osticks(100)); // TODO 100ms seems excessive so test and reduce
 
     // Fill each byte with one of the RandomNumberGen registers
@@ -1161,8 +1161,8 @@ int radio_init(void) {
     randomNumber(randseed);
     randbuf[0] = 16; // set initial index
     randround = 0;
-    
-    // Sleep needs to be entered from standby_RC mode 
+
+    // Sleep needs to be entered from standby_RC mode
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
         setStandby(STDBY_RC);
     }
@@ -1260,7 +1260,7 @@ void radio_monitor_rssi(ostime_t nTicks, oslmic_radio_rssi_t *pRssi) {
         notDone = now - (tBegin + nTicks) < 0;
     } while (notDone);
 
-    // put radio back to sleep. Sleep needs to be entered from standby_RC mode 
+    // put radio back to sleep. Sleep needs to be entered from standby_RC mode
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
         setStandby(STDBY_RC);
     }
@@ -1301,7 +1301,7 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
 #if LMIC_DEBUG_LEVEL > 0
     ostime_t const entry = now;
 #endif
-    
+
     u2_t rawFlags = getIrqStatus();
 
     // Map SX126x IRQ registers to 8 bit for consistency with legacy SX127x LMIC struct
@@ -1364,7 +1364,7 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
                 LMIC.rxtime, entry - LMIC.rxtime, now2 - entry, LMIC.rxtime-LMIC.txend);
 #endif
         }
-        
+
     } else { // FSK modem
         LMICOS_logEventUint32("radio_irq_handler_v2: LoRa", flags);
         LMIC_X_DEBUG_PRINTF("IRQ=%02x\n", flags);
@@ -1400,7 +1400,7 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
             LMIC.dataLen = 0;
         }
     }
-    
+
     // clear radio IRQ flags
     u2_t clearAllIrq = 0x03FF;
     clearIrqStatus(clearAllIrq);

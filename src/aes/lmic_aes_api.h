@@ -3,13 +3,13 @@
 Module:  lmic_aes_api.h
 
 Function:
-    The API type
+	The API type
 
 Copyright & License:
-    See accompanying LICENSE file.
+	See accompanying LICENSE file.
 
 Author:
-    Terry Moore, MCCI       May 2020
+	Terry Moore, MCCI	   May 2020
 
 */
 

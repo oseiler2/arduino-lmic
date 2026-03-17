@@ -3,13 +3,13 @@
 Module:  lmic_secure_element_api.h
 
 Function:
-    The API type
+	The API type
 
 Copyright & License:
-    See accompanying LICENSE file.
+	See accompanying LICENSE file.
 
 Author:
-    Terry Moore, MCCI       May 2020
+	Terry Moore, MCCI	   May 2020
 
 */
 
@@ -34,8 +34,8 @@ Author:
 /// \brief Select the secure-element driver
 ///
 /// \details
-///     This macro must be set to the name used by the secure element driver for
-///     its API functions. The default is `Default`.
+///	 This macro must be set to the name used by the secure element driver for
+///	 its API functions. The default is `Default`.
 ///
 /// \hideinitializer
 ///
@@ -44,17 +44,17 @@ Author:
 /// \brief Select linkage style
 ///
 /// \details
-///     If this macro is defined and non-zero, the secure element will
-///     be integrated with the LMIC at compile time. If defined and zero,
-///     the secure element driver will be accessed via external functions,
-///     allowing the integration to be deferred to link time or run time.
+///	 If this macro is defined and non-zero, the secure element will
+///	 be integrated with the LMIC at compile time. If defined and zero,
+///	 the secure element driver will be accessed via external functions,
+///	 allowing the integration to be deferred to link time or run time.
 ///
 /// \note
-///     At present, only compile-time integration is implemented.
+///	 At present, only compile-time integration is implemented.
 ///
 /// \hideinitializer
 ////
-# define LMIC_ENABLE_SecureElement_STATIC    1
+# define LMIC_ENABLE_SecureElement_STATIC	1
 #endif
 
 #if ! defined(LMIC_CFG_SecureElement_DRIVER)
@@ -62,11 +62,11 @@ Author:
 #endif
 
 #if ! defined(LMIC_ENABLE_SecureElement_STATIC)
-# define LMIC_ENABLE_SecureElement_STATIC    1
+# define LMIC_ENABLE_SecureElement_STATIC	1
 #endif
 
 /****************************************************************************\
-|       The portable API functions.
+|	   The portable API functions.
 \****************************************************************************/
 
 #if ! LMIC_ENABLE_SecureElement_STATIC
@@ -105,58 +105,58 @@ LMIC_SecureElement_aes128Encrypt_t LMIC_SecureElement_aes128Encrypt;
 
 /// \brief Generate a method function name without argument expansion
 /// \param a_driver The name of the driver (will be macro-expanded)
-/// \param a_fn     The function-name fragment (will be macro-expanded)
+/// \param a_fn	 The function-name fragment (will be macro-expanded)
 ///
 /// \details
-///     This macro is like \ref LMIC_SecureElement_METHOD() except that
-///     macros in the arguments are not expanded prior performing string substitution.
+///	 This macro is like \ref LMIC_SecureElement_METHOD() except that
+///	 macros in the arguments are not expanded prior performing string substitution.
 ///
-///     For example, writing:
+///	 For example, writing:
 ///
-///     \code
-///     #define LMIC_CFG_SecureElement_DRIVER Foo
-///     LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
-///     \endcode
+///	 \code
+///	 #define LMIC_CFG_SecureElement_DRIVER Foo
+///	 LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
+///	 \endcode
 ///
-///     is the same as writing:
+///	 is the same as writing:
 ///
-///     \code
-///     LMIC_SecureElement_LMIC_CFG_SecureElement_DRIVER_initialize();
-///     \endcode
+///	 \code
+///	 LMIC_SecureElement_LMIC_CFG_SecureElement_DRIVER_initialize();
+///	 \endcode
 ///
 /// \see LMIC_SecureElement_METHOD()
 /// \hideinitializer
 ///
 #define LMIC_SecureElement_METHOD_(a_driver, a_fn)  \
-    (LMIC_SecureElement_##a_driver##_##a_fn)
+	(LMIC_SecureElement_##a_driver##_##a_fn)
 
 /// \brief Generate a method function name
 /// \param a_driver The name of the driver (will be macro-expanded)
-/// \param a_fn     The function-name fragment (will be macro-expanded)
+/// \param a_fn	 The function-name fragment (will be macro-expanded)
 ///
 /// \details
-///     This macro returns a standard method function name. Standard method
-///     function names begin with `LMIC_SecureElement_`, followed by _a_driver_,
-///     followed by an underscore `_`, and ending with _a_fn_.
-///     For example, writing:
+///	 This macro returns a standard method function name. Standard method
+///	 function names begin with `LMIC_SecureElement_`, followed by _a_driver_,
+///	 followed by an underscore `_`, and ending with _a_fn_.
+///	 For example, writing:
 ///
-///     \code
-///     #define LMIC_CFG_SecureElement_DRIVER Foo
-///     LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
-///     \endcode
+///	 \code
+///	 #define LMIC_CFG_SecureElement_DRIVER Foo
+///	 LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
+///	 \endcode
 ///
-///     is the same as writing:
+///	 is the same as writing:
 ///
-///     \code
-///     LMIC_SecureElement_Foo_initialize();
-///     \endcode
+///	 \code
+///	 LMIC_SecureElement_Foo_initialize();
+///	 \endcode
 ///
-///     This macro is primarily intended for internal use.
+///	 This macro is primarily intended for internal use.
 ///
 /// \hideinitializer
 ///
 #define LMIC_SecureElement_METHOD(a_driver, a_fn)  \
-    LMIC_SecureElement_METHOD_(a_driver, a_fn)
+	LMIC_SecureElement_METHOD_(a_driver, a_fn)
 
 /// \cond FALSE
 LMIC_SecureElement_DECLARE_DRIVER_FNS(Default);
@@ -166,167 +166,167 @@ LMIC_SecureElement_DECLARE_DRIVER_FNS(Default);
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_initialize(void) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, initialize)();
 }
 
 /// \copydoc LMIC_SecureElement_getRandomU1_t
 static inline
 uint8_t LMIC_ABI_STD
 LMIC_SecureElement_getRandomU1(void) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getRandomU1)();
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getRandomU1)();
 }
 
 /// \copydoc LMIC_SecureElement_getRandomU2_t
 static inline
 uint16_t LMIC_ABI_STD
 LMIC_SecureElement_getRandomU2(void) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getRandomU2)();
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getRandomU2)();
 }
 
 /// \copydoc LMIC_SecureElement_fillRandomBuffer_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_fillRandomBuffer(uint8_t *buffer, uint8_t nBuffer) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, fillRandomBuffer)(buffer, nBuffer);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, fillRandomBuffer)(buffer, nBuffer);
 }
 
 /// \copydoc LMIC_SecureElement_setAppKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_setAppKey(const LMIC_SecureElement_Aes128Key_t *pAppKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppKey)(pAppKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppKey)(pAppKey);
 }
 
 /// \copydoc LMIC_SecureElement_getAppKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_getAppKey(LMIC_SecureElement_Aes128Key_t *pAppKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppKey)(pAppKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppKey)(pAppKey);
 }
 
 /// \copydoc LMIC_SecureElement_setAppEUI_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_setAppEUI(const LMIC_SecureElement_EUI_t *pAppEUI) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppEUI)(pAppEUI);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppEUI)(pAppEUI);
 }
 
 /// \copydoc LMIC_SecureElement_getAppEUI_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_getAppEUI(LMIC_SecureElement_EUI_t *pAppEUI) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppEUI)(pAppEUI);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppEUI)(pAppEUI);
 }
 
 /// \copydoc LMIC_SecureElement_setDevEUI_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_setDevEUI(const LMIC_SecureElement_EUI_t *pDevEUI) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setDevEUI)(pDevEUI);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setDevEUI)(pDevEUI);
 }
 
 /// \copydoc LMIC_SecureElement_getDevEUI_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_getDevEUI(LMIC_SecureElement_EUI_t *pDevEUI) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getDevEUI)(pDevEUI);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getDevEUI)(pDevEUI);
 }
 
 /// \copydoc LMIC_SecureElement_setNwkSKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_setNwkSKey(const LMIC_SecureElement_Aes128Key_t *pNwkSKey, LMIC_SecureElement_KeySelector_t iKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setNwkSKey)(pNwkSKey, iKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setNwkSKey)(pNwkSKey, iKey);
 }
 
 /// \copydoc LMIC_SecureElement_getNwkSKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_getNwkSKey(LMIC_SecureElement_Aes128Key_t *pNwkSKey, LMIC_SecureElement_KeySelector_t iKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getNwkSKey)(pNwkSKey, iKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getNwkSKey)(pNwkSKey, iKey);
 }
 
 /// \copydoc LMIC_SecureElement_setAppSKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_setAppSKey(const LMIC_SecureElement_Aes128Key_t *pAppSKey, LMIC_SecureElement_KeySelector_t iKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppSKey)(pAppSKey, iKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, setAppSKey)(pAppSKey, iKey);
 }
 
 /// \copydoc LMIC_SecureElement_getAppSKey_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_getAppSKey(LMIC_SecureElement_Aes128Key_t *pAppSKey, LMIC_SecureElement_KeySelector_t iKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppSKey)(pAppSKey, iKey);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, getAppSKey)(pAppSKey, iKey);
 }
 
 /// \copydoc LMIC_SecureElement_createJoinRequest_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_createJoinRequest(
-    uint8_t *pJoinRequestBytes, LMIC_SecureElement_JoinFormat_t joinFormat
+	uint8_t *pJoinRequestBytes, LMIC_SecureElement_JoinFormat_t joinFormat
 ) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, createJoinRequest)(pJoinRequestBytes, joinFormat);
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, createJoinRequest)(pJoinRequestBytes, joinFormat);
 }
 
 /// \copydoc LMIC_SecureElement_decodeJoinAccept_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_decodeJoinAccept(
-    const uint8_t *pJoinAcceptBytes, uint8_t nJoinAcceptBytes,
-    uint8_t *pJoinAcceptClearText,
-    LMIC_SecureElement_JoinFormat_t joinFormat
+	const uint8_t *pJoinAcceptBytes, uint8_t nJoinAcceptBytes,
+	uint8_t *pJoinAcceptClearText,
+	LMIC_SecureElement_JoinFormat_t joinFormat
 ) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, decodeJoinAccept)(
-        pJoinAcceptBytes, nJoinAcceptBytes, pJoinAcceptClearText, joinFormat
-        );
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, decodeJoinAccept)(
+		pJoinAcceptBytes, nJoinAcceptBytes, pJoinAcceptClearText, joinFormat
+		);
 }
 
 /// \copydoc LMIC_SecureElement_encodeMessage_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_encodeMessage(const uint8_t *pMessage, uint8_t nMessage, uint8_t iPayload, uint8_t *pCipherTextBuffer, LMIC_SecureElement_KeySelector_t iKey) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, encodeMessage)(
-        pMessage, nMessage, iPayload, pCipherTextBuffer, iKey
-        );
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, encodeMessage)(
+		pMessage, nMessage, iPayload, pCipherTextBuffer, iKey
+		);
 }
 
 /// \copydoc LMIC_SecureElement_verifyMIC_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_verifyMIC(
-    const uint8_t *pPhyPayload,
-    uint8_t nPhyPayload,
-    uint32_t devAddr,
-    uint32_t FCntDown,
-    LMIC_SecureElement_KeySelector_t iKey
+	const uint8_t *pPhyPayload,
+	uint8_t nPhyPayload,
+	uint32_t devAddr,
+	uint32_t FCntDown,
+	LMIC_SecureElement_KeySelector_t iKey
 ) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, verifyMIC)(
-        pPhyPayload, nPhyPayload, devAddr, FCntDown, iKey
-        );
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, verifyMIC)(
+		pPhyPayload, nPhyPayload, devAddr, FCntDown, iKey
+		);
 }
 
 /// \copydoc LMIC_SecureElement_decodeMessage_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_decodeMessage(
-    const uint8_t *pPhyPayload, uint8_t nPhyPayload,
-    uint32_t devAddr, uint32_t FCntDown,
-    LMIC_SecureElement_KeySelector_t iKey,
-    uint8_t *pClearTextBuffer
+	const uint8_t *pPhyPayload, uint8_t nPhyPayload,
+	uint32_t devAddr, uint32_t FCntDown,
+	LMIC_SecureElement_KeySelector_t iKey,
+	uint8_t *pClearTextBuffer
 ) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, decodeMessage)(
-        pPhyPayload, nPhyPayload, devAddr, FCntDown, iKey, pClearTextBuffer
-        );
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, decodeMessage)(
+		pPhyPayload, nPhyPayload, devAddr, FCntDown, iKey, pClearTextBuffer
+		);
 }
 
 /// \copydoc LMIC_SecureElement_aes128Encrypt_t
 static inline
 LMIC_SecureElement_Error_t LMIC_ABI_STD
 LMIC_SecureElement_aes128Encrypt(const uint8_t *pKey, const uint8_t *pInput, uint8_t *pOutput) {
-    return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, aes128Encrypt)(
-        pKey, pInput, pOutput
-        );
+	return LMIC_SecureElement_METHOD(LMIC_CFG_SecureElement_DRIVER, aes128Encrypt)(
+		pKey, pInput, pOutput
+		);
 }
 
 #endif // LMIC_ENABLE_SecureElement_STATIC
