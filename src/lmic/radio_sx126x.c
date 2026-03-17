@@ -31,6 +31,7 @@
 #define LMIC_DR_LEGACY 0
 
 #include "lmic.h"
+#include "../se/i/lmic_secure_element_api.h"
 
 #if defined(CFG_sx1261_radio) || defined(CFG_sx1262_radio)
 // This driver is based on Rev. 2.1 of the Semtech SX1261/2 Data Sheet DS.SX1261-2.W.APP
@@ -248,6 +249,8 @@
 // RADIO STATE
 // (initialized by radio_init(), used by radio_rand1())
 static u1_t randbuf[SX126X_RAND_SEED_LEN];
+static u4_t randround;
+static u1_t randseed[SX126X_RAND_SEED_LEN];
 
 // ----------------------------------------
 // Chapter 13.2: Registers and Buffer Access Functions
@@ -516,7 +519,7 @@ static u1_t getPacketType(void) {
 // params than is used here. This might become a TODO, to implement the rest of
 // the optimal setPaParams
 static void setTxParams(void) {
-    s1_t setTxPower = LMIC.radio_txpow;
+    s1_t setTxPower = LMIC.radio.txpow;
     #ifdef CFG_sx1261_radio
     if (setTxPower == 15) {
         setPaConfig(0x06, 0x00, 0x01, 0x01);
@@ -1153,9 +1156,11 @@ int radio_init(void) {
         return 0;
     }
 
-    // seed 15-byte randomness via noise rssi
+    // seed randomness via hardware RNG
     randomNumber(randbuf);
+    randomNumber(randseed);
     randbuf[0] = 16; // set initial index
+    randround = 0;
     
     // Sleep needs to be entered from standby_RC mode 
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
@@ -1171,7 +1176,9 @@ u1_t radio_rand1(void) {
     u1_t i = randbuf[0];
     ASSERT( i != 0 );
     if(i == 16) {
-        os_aes(AES_ENC, randbuf, 16); // encrypt seed with any key
+        os_wlsbf4(randbuf, randround);
+        ++randround;
+        LMIC_SecureElement_aes128Encrypt(randseed, randbuf, randbuf); // encrypt seed with any key
         i = 0;
     }
     u1_t v = randbuf[i++];
@@ -1326,14 +1333,17 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
                 now -= TABLE_GET_U2(LORA_RXDONE_FIXUP, getSf(LMIC.rps));
             }
             LMIC.rxtime = now;
+            LMIC.radio.rxtime = now;
             // read the PDU and inform the MAC that we received something
             u1_t rxBufferStatusRaw[SX126X_RXBUFFERSTATUS_LEN];
             u1_t packetStatusRaw[SX126X_PACKETSTATUS_LEN];
 
             getRxBufferStatus(rxBufferStatusRaw);
             LMIC.dataLen = rxBufferStatusRaw[0];
-            // now read the FIFO
-            readBuffer(rxBufferStatusRaw[1], LMIC.frame, LMIC.dataLen);
+            LMIC.radio.dataLen = LMIC.dataLen;
+            // now read the FIFO - use pFrame if set (for Class C), otherwise LMIC.frame
+            u1_t *pFrame = (LMIC.radio.pFrame != NULL) ? LMIC.radio.pFrame : LMIC.frame;
+            readBuffer(rxBufferStatusRaw[1], pFrame, LMIC.dataLen);
             // read rx quality parameters
             getPacketStatus(packetStatusRaw);
             LMIC.snr  = packetStatusRaw[1]; // SNR [dB] * 4
@@ -1366,13 +1376,16 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
         } else if (flags & IRQ_LORA_RXDONE_MASK) {
             // save exact rx time
             LMIC.rxtime = now;
+            LMIC.radio.rxtime = now;
             // read the PDU and inform the MAC that we received something
             u1_t rxBufferStatusRaw[SX126X_RXBUFFERSTATUS_LEN];
             u1_t packetStatusRaw[SX126X_PACKETSTATUS_LEN];
             getRxBufferStatus(rxBufferStatusRaw);
             LMIC.dataLen = rxBufferStatusRaw[0];
-            // now read the FIFO
-            readBuffer(rxBufferStatusRaw[1], LMIC.frame, LMIC.dataLen);
+            LMIC.radio.dataLen = LMIC.dataLen;
+            // now read the FIFO - use pFrame if set (for Class C), otherwise LMIC.frame
+            u1_t *pFrame = (LMIC.radio.pFrame != NULL) ? LMIC.radio.pFrame : LMIC.frame;
+            readBuffer(rxBufferStatusRaw[1], pFrame, LMIC.dataLen);
             // read rx quality parameters
             LMIC.snr  = 0;              // SX126x doesn't give SNR for FSK.
             u1_t const rRssi = packetStatusRaw[2]; // - RSSI [dB] * 2
@@ -1393,70 +1406,158 @@ void radio_irq_handler_v2(u1_t dio, ostime_t now) {
     clearIrqStatus(clearAllIrq);
 
     // go from standby to sleep
-    // Sleep needs to be entered from standby_RC mode 
+    // Sleep needs to be entered from standby_RC mode
     if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
         setStandby(STDBY_RC);
     }
     setSleep(0);
-    // run os job (use preset func ptr)
-    os_setCallback(&LMIC.osjob, LMIC.osjob.func);
+
+    // mark radio as done
+    LMIC.radio.state = LMIC_RADIO_EV_NONE;
+
+    // run os job (use pRadioDoneJob if set, otherwise use legacy LMIC.osjob)
+    osjob_t *pJob = LMIC.radio.pRadioDoneJob;
+    if (pJob != NULL) {
+        LMIC.radio.pRadioDoneJob = NULL;
+        os_setCallback(pJob, pJob->func);
+    } else {
+        os_setCallback(&LMIC.osjob, LMIC.osjob.func);
+    }
 #endif /* ! CFG_TxContinuousMode */
 }
 
-/*!
+///
+/// \brief Check if transmit is active
+///
+static inline bit_t os_radio_isTxActive(lmic_radio_state_t state) {
+    return (state & LMIC_RADIO_EV_TXSTART) != 0 &&
+           (state & LMIC_RADIO_EV_TXDONE) == 0;
+}
 
-\brief Initiate a radio operation.
+///
+/// \brief Check if receive is active
+///
+static inline bit_t os_radio_isRxActive(lmic_radio_state_t state) {
+    return (state & LMIC_RADIO_EV_RXSTART) != 0 &&
+           (state & LMIC_RADIO_EV_RXDONE) == 0;
+}
 
-\param mode Selects the operation to be performed.
+///
+/// \brief Check if any radio operation is active
+///
+static inline bit_t os_radio_isStateActive(lmic_radio_state_t state) {
+    return os_radio_isTxActive(state) || os_radio_isRxActive(state);
+}
 
-The requested radio operation is initiated. Some operations complete
-immediately; others require hardware to do work, and don't complete until
-an interrupt occurs. In that case, `LMIC.osjob` is scheduled. Because the
-interrupt may occur right away, it's important that the caller initialize
-`LMIC.osjob` before calling this routine.
-
-- `RADIO_RST` causes the radio to be put to sleep. No interrupt follows;
-when control returns, the radio is ready for the next operation.
-
-- `RADIO_TX` and `RADIO_TX_AT` launch the transmission of a frame. An interrupt will
-occur, which will cause `LMIC.osjob` to be scheduled with its current
-function.
-
-- `RADIO_RX` and `RADIO_RX_ON` launch either single or continuous receives.
-An interrupt will occur when a packet is recieved or the receive times out,
-which will cause `LMIC.osjob` to be scheduled with its current function.
-
-*/
+///
+/// \brief Reset the radio and clear state
+///
+static void os_radio_reset(void) {
+    // Sleep needs to be entered from standby_RC mode
+    if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
+        setStandby(STDBY_RC);
+    }
+    setSleep(0x00);
+    LMIC.radio.state = LMIC_RADIO_EV_NONE;
+    LMIC.radio.pRadioDoneJob = NULL;
+}
 
 void os_radio(u1_t mode) {
+    // populate LMIC.radio fields from LMIC for compatibility
+    LMIC.radio.freq = LMIC.freq;
+    LMIC.radio.pFrame = LMIC.frame;
+    LMIC.radio.rxtime = LMIC.rxtime;
+    LMIC.radio.rps = LMIC.rps;
+    LMIC.radio.rxsyms = LMIC.rxsyms;
+    LMIC.radio.dataLen = LMIC.dataLen;
+    // Note: LMIC.radio.txpow is already set by lmic.c before calling os_radio()
+    LMIC.radio.flags = 0;
+    if (LMIC.noRXIQinversion) {
+        LMIC.radio.flags |= LMIC_RADIO_FLAGS_NO_RX_IQ_INVERSION;
+    }
+
+    os_radio_v2(mode, &LMIC.osjob);
+}
+
+///
+/// \brief Initiate a radio operation.
+///
+/// \param mode [in]    Selects the operation to be performed.
+/// \param pJob [inout]  Job to be scheduled when operation completes.
+///
+/// \details
+///     The requested radio operation is initiated. Some operations complete
+///     immediately; others require hardware to do work, and don't complete until
+///     an interrupt occurs. In that case, `pJob` is scheduled.
+///     Because the
+///     interrupt may occur right away, it's important that the caller initialize
+///     `pJob` before calling this routine.
+///
+///     - `RADIO_RST` causes the radio to be put to sleep. No interrupt follows;
+///     when control returns, the radio is ready for the next operation. `pJob`
+///     is not scheduled. If an operation was pending, it is canceled.
+///
+///     - `RADIO_TX` and `RADIO_TX_AT` launch the transmission of a frame. An interrupt will
+///     occur, which will cause `pJob` to be scheduled with its current
+///     function.
+///
+///     - `RADIO_RX`, `RADIO_RX_ON` and `RADIO_RX_ON_C` launch either timed or
+///     untimed receives. An interrupt will occur when a packet is received or
+///     the receive times out, which will cause `pJob` to be scheduled with
+///     its current function. `RADIO_RX_ON_C` is used to schedule a request that
+///     might be redundant, for class C support.
+///
+void os_radio_v2(u1_t mode, osjob_t *pJob) {
+    // handle redundant class-C requests.
+    if (mode == RADIO_RXON_C &&
+        os_radio_isRxActive(LMIC.radio.state) &&
+        pJob == LMIC.radio.pRadioDoneJob) {
+        LMICOS_logEventUint32("redundant class C RX", LMIC.radio.state);
+        return;
+    }
+
+    // handle requests while radio is active: cancel.
+    if (mode != RADIO_RST) {
+        if (LMIC.radio.state != LMIC_RADIO_EV_NONE) {
+            LMICOS_logEventUint32("request while radio active", LMIC.radio.state);
+            // recurse and kill the pending activity
+            os_radio_reset();
+        }
+        // record job
+        LMIC.radio.pRadioDoneJob = pJob;
+    }
+
     switch (mode) {
       case RADIO_RST:
-        // put radio to sleep. Sleep needs to be entered from standby_RC mode 
-        if ((getStatus() | SX126x_GETSTATUS_CHIPMODE_MASK) != SX126x_CHIPMODE_STDBY_RC) {
-            setStandby(STDBY_RC);
-        }
-        setSleep(0x00);
+        os_radio_reset();
         break;
 
       case RADIO_TX:
         // transmit frame now
         LMIC.txend = 0;
+        LMIC.radio.state = LMIC_RADIO_EV_TXSTART;
         starttx(); // buf=LMIC.frame, len=LMIC.dataLen
         break;
 
       case RADIO_TX_AT:
+        // make sure transmit time is non-zero to force
+        // scheduling at a specific time.
         if (LMIC.txend == 0)
             LMIC.txend = 1;
+        LMIC.radio.state = LMIC_RADIO_EV_TXSTART;
         starttx();
         break;
 
       case RADIO_RX:
         // receive frame now (exactly at rxtime)
+        LMIC.radio.state = LMIC_RADIO_EV_RXSTART;
         startrx(RXMODE_SINGLE); // buf=LMIC.frame, time=LMIC.rxtime, timeout=LMIC.rxsyms
         break;
 
       case RADIO_RXON:
-        // start scanning for beacon now
+      case RADIO_RXON_C:
+        // start scanning for beacon now (or class C continuous RX)
+        LMIC.radio.state = LMIC_RADIO_EV_RXSTART;
         startrx(RXMODE_SCAN); // buf=LMIC.frame
         break;
     }
