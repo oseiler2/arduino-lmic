@@ -6,6 +6,7 @@ This directory contains documentation on the use and implementation of the LMIC.
 
 - [`LMIC-v5.0.0.pdf`](./LMIC-v5.0.0.pdf): API documentation on the LMIC as of 5.0.0.
 - [`LMIC-v5.0.0-redline.pdf`](./LMIC-v5.0.0-redline.pdf): changes in the document since last update, marked up by Litera Workshare Compare.
+- [`CLASS-C.md`](./CLASS-C.md): documentation on Class C support, including API reference and usage examples.
 
 ## Background information
 
@@ -15,7 +16,7 @@ This directory contains documentation on the use and implementation of the LMIC.
 
 - [`RadioDriver.md`](./RadioDriver.md): documentation of the radio driver interface.
 - [`LMIC-structure-diagram.pdf`](./LMIC-structure-diagram.pdf): a structural diagram of the LMIC. This is somewhat UML like.
-- [`LMIC-FSM.pdf`](./LMIC-FSM.pdf): the operating logic of the LMIC, modeled as a finite state machine. As of version 3.2, this model is idealized; the actual implementation is not an explicit state machine. However, if you search for `os_setCallback()` and `os_setTimedCallback()`, you will see the links between event callbacks, and that will generally correspond to the implementation.  The FSM diagram doesn't show class-B or class-C operation as yet.
+- [`LMIC-FSM.pdf`](./LMIC-FSM.pdf): the operating logic of the LMIC, modeled as a finite state machine. As of version 3.2, this model is idealized; the actual implementation is not an explicit state machine. However, if you search for `os_setCallback()` and `os_setTimedCallback()`, you will see the links between event callbacks, and that will generally correspond to the implementation. Class C operation is now supported; see [`CLASS-C.md`](./CLASS-C.md) for details.
 
 ## Historical information
 

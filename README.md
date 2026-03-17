@@ -42,6 +42,7 @@
 	- [Controlling use of interrupts](#controlling-use-of-interrupts)
 	- [Disabling PING](#disabling-ping)
 	- [Disabling Beacons](#disabling-beacons)
+	- [Enabling Class C](#enabling-class-c)
 	- [Enabling/Disabling Network Time Support](#enablingdisabling-network-time-support)
 	- [Rarely changed variables](#rarely-changed-variables)
 		- [Changing debug output](#changing-debug-output)
@@ -135,7 +136,7 @@ Raise a GitHub issue at [`github.com/mcci-catena/arduino-lmic`](https://github.c
 
 ## Features
 
-The LMIC library provides a fairly complete LoRaWAN Class A and Class B
+The LMIC library provides a fairly complete LoRaWAN Class A, Class B, and Class C
 implementation, supporting the EU-868, US-915, AU-921, AS-923, and IN-866 bands. Only a limited
 number of features was tested using this port on Arduino hardware, so be careful when using any of the untested features.
 
@@ -149,6 +150,7 @@ What certainly works:
 - Over-the-air activation (OTAA / joining).
 - Receiving downlink packets in the RX1 and RX2 windows.
 - MAC command processing.
+- Class C continuous reception (must be explicitly enabled at compile time and runtime).
 
 What has not been tested:
 
@@ -332,6 +334,16 @@ If defined, removes all code needed for handling beacons. Removes the APIs `LMIC
 Enabling beacon handling allows tracking of network time, and is required if you want to enable downlink during ping slots. However, many networks don't support Class B devices. Class A devices don't support tracking beacons, so defining `DISABLE_BEACONS` might be a good idea.
 
 By default, beacon support is included in the library.
+
+### Enabling Class C
+
+`#define LMIC_ENABLE_class_c 1`
+
+If defined to a non-zero value, enables Class C continuous reception support. Class C devices keep the receiver active whenever not transmitting, allowing them to receive downlink messages at any time (not just during the RX1/RX2 windows after an uplink).
+
+When enabled, you must also call `LMIC_enableClassC(1)` at runtime (typically in your `EV_JOINED` event handler) to activate Class C mode. See [doc/CLASS-C.md](doc/CLASS-C.md) for detailed usage information.
+
+By default, Class C support is disabled (`LMIC_ENABLE_class_c` is 0) to minimize code size and RAM usage on constrained devices.
 
 ### Enabling/Disabling Network Time Support
 
@@ -1017,6 +1029,10 @@ function uflt12f(rawUflt12)
   - Initialize DHT sensor in ttn-abp-feather-us915-dht22 example ([#902](https://github.com/mcci-catena/arduino-lmic/pull/902))
   - Fix configPower for sx1272 ([#894](https://github.com/mcci-catena/arduino-lmic/pull/894))
   - Enable device time by request ([#840](https://github.com/mcci-catena/arduino-lmic/pull/840))
+  - Correct bug in MAC Rx1DrOffset error checking for regions other than US ([#841](https://github.com/mcci-catena/arduino-lmic/issues/841)). Thanks to @GitTibbe for finding this.
+  - Refactor the LMIC to enable secure element support ([#578](https://github.com/mcci-catena/arduino-lmic/issues/578)).
+  - Add Class C support ([#323](https://github.com/mcci-catena/arduino-lmic/issues/323)).
+  - Start resurrecting Doxygen support.
 
 - v4.1.1 is a patch release.
 
