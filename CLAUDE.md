@@ -63,8 +63,43 @@ Key suppression/redirection macros: `ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS`, `A
 
 ## Key Documentation
 
-- `doc/` contains PDF API docs (`LMIC-v5.0.0.pdf`), structure diagram, FSM diagram
+- `doc/README.md` -- documentation index with links to all docs
+- `doc/configuration.md` -- full configuration reference (all compile-time settings)
 - `doc/CLASS-C.md` -- Class C usage guide and API reference
-- `RadioDriver.md` -- radio driver interface specification
+- `doc/timing.md` -- protocol timing, clock error, interrupt handling
+- `doc/encoding-utilities.md` -- sflt16/uflt16/sflt12/uflt12 formats with JS decoders
+- `doc/RadioDriver.md` -- radio driver interface specification
 - `doc/HOWTO-ADD-REGION.md` -- step-by-step region addition guide
-- `README.md` -- landing page with links to detailed docs in `doc/`
+- `doc/HOWTO-Manually-Configure.md` -- hardware wiring and pin mapping
+- `doc/LMIC-v5.0.0.pdf` -- API reference PDF (v6 update pending)
+- `CHANGELOG.md` -- release history
+- `README.md` -- landing page with links to detailed docs
+- **GitHub Pages** (Doxygen): https://mcci-catena.github.io/arduino-lmic/
+
+## Release Process
+
+Reference: issue #978 documents the v5.0.0 release checklist.
+
+To prepare a release (using `gh` CLI where possible):
+
+1. **Choose version number** (semver: breaking = major, features = minor, fixes = patch)
+2. **Update version in code:**
+   - `src/lmic/lmic.h`: `ARDUINO_LMIC_VERSION_CALC(major, minor, patch, 0)`
+   - `library.properties`: `version=X.Y.Z`
+   - `Doxyfile`: `PROJECT_NUMBER = X.Y.Z`
+3. **Update README.md badges:**
+   - commits-since badge: change `compare/vOLD...master` to `compare/vNEW...master`
+4. **Update CHANGELOG.md** with new version entry at top
+5. **Update copyright dates** if year has changed (search for prior year)
+6. **Update API documentation** (if applicable):
+   - Update Word doc, rename with new version, regenerate PDF and redline
+   - Update filename references in `doc/README.md` and `README.md`
+   - Or defer to next release
+7. **Create PR, get CI green, merge**
+8. **Tag and create release:**
+   ```bash
+   git tag v$VERSION
+   git push origin v$VERSION
+   gh release create v$VERSION --title "v$VERSION: short description" --generate-notes
+   ```
+9. **Verify:** Arduino Library Manager picks up new version (may take hours)
