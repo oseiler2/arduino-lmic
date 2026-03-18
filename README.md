@@ -116,7 +116,7 @@ The [`doc/`](doc/) directory contains the full documentation set. Key references
 - [Timing](doc/timing.md) -- protocol timing, clock error, and interrupt handling
 - [Encoding Utilities](doc/encoding-utilities.md) -- `sflt16`, `uflt16`, `sflt12`, `uflt12` formats with JavaScript decoders
 - [Radio Driver](doc/RadioDriver.md) -- radio driver interface specification
-- [Adding Regions](HOWTO-ADD-REGION.md) -- step-by-step guide for new regional configurations
+- [Adding Regions](doc/HOWTO-ADD-REGION.md) -- step-by-step guide for new regional configurations
 - [API Reference PDF](doc/LMIC-v5.0.0.pdf) -- based on the original IBM documentation (v6 update pending)
 
 See [`doc/README.md`](doc/README.md) for the complete documentation index.
