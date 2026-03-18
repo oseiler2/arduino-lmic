@@ -37,7 +37,7 @@ Key suppression/redirection macros: `ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS`, `A
 
 **Radio drivers** (`src/lmic/radio_sx127x.c`, `radio_sx126x.c`): Selected at compile time by `CFG_sx1272_radio`/`CFG_sx1276_radio` or `CFG_sx1261_radio`/`CFG_sx1262_radio`. Common interface via `os_radio()` with command codes (`RADIO_RST`, `RADIO_TX`, `RADIO_RX`, etc.). Parameters and results passed through the global `LMIC` structure.
 
-**Region bandplans** (`src/lmic/lmic_*region*.c`, `lorabase_*region*.h`, `lmic_bandplan_*region*.h`): Compile-time region selection -- one region per build. EU-like (EU868, AS923, IN866, KR920) and US-like (US915, AU915) share base implementations. See `HOWTO-ADD-REGION.md` for the pattern.
+**Region bandplans** (`src/lmic/lmic_*region*.c`, `lorabase_*region*.h`, `lmic_bandplan_*region*.h`): Compile-time region selection -- one region per build. EU-like (EU868, AS923, IN866, KR920) and US-like (US915, AU915) share base implementations. See `doc/HOWTO-ADD-REGION.md` for the pattern.
 
 **HAL** (`src/hal/`): C++ layer abstracting Arduino hardware. `hal.cpp` is the main implementation. Board-specific pin maps in `getpinmap_*.cpp` files. Runtime configuration via `HalPinmap_t` (pin assignments, SPI freq, RSSI cal) and virtual `HalConfiguration_t` class (TX power policy, TCXO, RF switch control).
 
@@ -66,5 +66,5 @@ Key suppression/redirection macros: `ARDUINO_LMIC_PROJECT_CONFIG_H_SUPPRESS`, `A
 - `doc/` contains PDF API docs (`LMIC-v5.0.0.pdf`), structure diagram, FSM diagram
 - `doc/CLASS-C.md` -- Class C usage guide and API reference
 - `RadioDriver.md` -- radio driver interface specification
-- `HOWTO-ADD-REGION.md` -- step-by-step region addition guide
-- `README.md` -- comprehensive user guide (78KB)
+- `doc/HOWTO-ADD-REGION.md` -- step-by-step region addition guide
+- `README.md` -- landing page with links to detailed docs in `doc/`
