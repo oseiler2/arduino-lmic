@@ -280,8 +280,8 @@ static u1_t readRegister(u2_t addr) {
 // Write `len` bytes from `buf` to the FIFO buffer starting at buffer address `addr`
 static void writeBuffer(u1_t addr, xref2u1_t buf, u1_t len) {
     // Set the TX buffer base address. Leave RX base address as 0
-    u1_t baseAddr[SX126X_BUFF_BASE_ADDR_LEN] = {addr, 0};
-    lmic_hal_spi_write(SetBufferBaseAddress, &addr, SX126X_BUFF_BASE_ADDR_LEN);
+    const u1_t baseAddr[SX126X_BUFF_BASE_ADDR_LEN] = {addr, 0};
+    lmic_hal_spi_write(SetBufferBaseAddress, baseAddr, sizeof(baseAddr));
 
     // Prepend the offset byte to the data being written to the buffer
     u1_t new_buf[len + 1];
