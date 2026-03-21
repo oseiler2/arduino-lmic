@@ -44,7 +44,7 @@ modules and the Murata LoRa modules).
 
 Information about the LoRaWAN protocol is summarized in [LoRaWAN-at-a-glance](doc/LoRaWAN-at-a-glance.pdf). Full information is available from the [LoRa Alliance](https://lora-alliance.org).
 
-A support forum is available at [forum.mcci.io](https://forum.mcci.io/c/device-software/arduino-lmic/5).
+For support, please open an entry in the [GitHub Discussions](https://github.com/mcci-catena/arduino-lmic/discussions) tab of the LMIC page on github.
 
 The base Arduino library mostly exposes the functions defined by LMIC. It makes no
 attempt to wrap them in a higher level API that is more in the Arduino
@@ -74,7 +74,7 @@ For more info, see [https://www.arduino.cc/en/Guide/Libraries](https://www.ardui
 
 ### If it's not working
 
-Ask questions at [`forum.mcci.io`](https://forum.mcci.io/c/device-software/arduino-lmic/5). Wireless is tricky, so don't be afraid to ask. The LMIC has been used successfully in a lot of applications, but it's common to have problems getting it working. To keep the code size down, there are not a lot of debugging features, and the features are not always easy to use.
+Ask questions in the [GitHub Discussions](https://github.com/mcci-catena/arduino-lmic/discussions) tab of the LMIC page on github. Wireless is tricky, so don't be afraid to ask. The LMIC has been used successfully in a lot of applications, but it's common to have problems getting it working. To keep the code size down, there are not a lot of debugging features, and the features are not always easy to use.
 
 ### If you've found a bug
 
