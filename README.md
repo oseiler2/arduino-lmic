@@ -37,8 +37,8 @@
 
 This repository contains the IBM LMIC (LoRaWAN-MAC-in-C) library, slightly
 modified to run in the Arduino environment, allowing using the SX1272,
-SX1276 transceivers and compatible modules (such as some HopeRF RFM9x
-modules and the Murata LoRa modules).
+SX1276, SX126x transceivers and compatible modules (such as some HopeRF RFM9x
+modules and the Murata ABZ and 1SJ LoRa modules).
 
 > Note on names: the library was originally ported to Arduino by Matthijs Kooijman and Thomas Telkamp, and was named Arduino LMIC. Subsequently, MCCI did a lot of work to support other regions, and ultimately took over maintenance. The Arduino IDE doesn't like two libraries with the same name, so we had to come up with a new name. So in the IDE, it will appear as MCCI LoRaWAN LMIC Library; but all us know it by the primary header file, which is `<arduino_lmic.h>`.
 
